@@ -3,3 +3,6 @@
  */
 
 package utils
+
+type NString struct {
+}
