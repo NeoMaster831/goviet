@@ -1,4 +1,4 @@
 # goviet
-> *legit* CS:GO advantage provider
+> *legit* osu! advantage provider
 
 추가 예정
