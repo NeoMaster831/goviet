@@ -1,7 +1,15 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"pr0j3ct5/goviet/src/utils"
+)
 
 func main() {
-	fmt.Println("OG for a fee, stay sippin'")
+	pid, err := utils.GetPID("Notepad.exe")
+	if err != nil {
+		fmt.Println(err.Error())
+	} else {
+		fmt.Println(pid)
+	}
 }
