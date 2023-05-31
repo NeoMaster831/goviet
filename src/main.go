@@ -7,6 +7,7 @@ import (
 
 func main() {
 	pid, err := utils.GetPID("Notepad.exe")
+
 	if err != nil {
 		fmt.Println(err.Error())
 	} else {
