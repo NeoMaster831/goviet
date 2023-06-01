@@ -5,12 +5,14 @@
 package winapi
 
 import (
+	"errors"
 	"syscall"
 	"unsafe"
 )
 
 const (
-	MAX_PATH uint32 = 260
+	MAX_PATH          uint32 = 260
+	MAX_MODULE_NAME32 uint32 = 255
 )
 
 var (
@@ -20,6 +22,9 @@ var (
 	ProcProcess32First           = kernel32.MustFindProc("Process32First")
 	ProcProcess32Next            = kernel32.MustFindProc("Process32Next")
 	ProcCreateToolhelp32Snapshot = kernel32.MustFindProc("CreateToolhelp32Snapshot")
+	ProcOpenProcess              = kernel32.MustFindProc("OpenProcess")
+	ProcModule32First            = kernel32.MustFindProc("Module32First")
+	ProcModule32Next             = kernel32.MustFindProc("Module32Next")
 )
 
 type ProcessEntry32 struct {
@@ -35,6 +40,19 @@ type ProcessEntry32 struct {
 	SzExeFile           [MAX_PATH]uint8
 }
 
+type ModuleEntry32 struct {
+	DwSize        uint32
+	Th32ModuleID  uint32
+	Th32ProcessID uint32
+	GlblcntUsage  uint32
+	ProccntUsage  uint32
+	ModBaseAddr   *uint8
+	ModBaseSize   uint32
+	HModule       uintptr
+	SzModule      [MAX_MODULE_NAME32 + 1]uint8
+	SzExePath     [MAX_PATH]uint8
+}
+
 func CreateToolhelp32Snapshot(dwFlags uint32, th32ProcessID uint32) (ret uintptr) {
 	ret, _, _ = ProcCreateToolhelp32Snapshot.Call(
 		uintptr(dwFlags),
@@ -43,8 +61,8 @@ func CreateToolhelp32Snapshot(dwFlags uint32, th32ProcessID uint32) (ret uintptr
 	return
 }
 
-func WriteProcessMemory(hProcess, lpBaseAddress, lpBuffer uintptr, nSize uint) (uintptr, error) {
-	ret, _, err := ProcWriteProcessMemory.Call(
+func WriteProcessMemory(hProcess, lpBaseAddress, lpBuffer uintptr, nSize uint) uint8 {
+	ret, _, _ := ProcWriteProcessMemory.Call(
 		hProcess,
 		lpBaseAddress,
 		lpBuffer,
@@ -52,15 +70,11 @@ func WriteProcessMemory(hProcess, lpBaseAddress, lpBuffer uintptr, nSize uint) (
 		0,
 	)
 
-	if err.Error() != "The operation completed successfully." {
-		return 0, err
-	}
-
-	return ret, nil
+	return uint8(ret)
 }
 
-func ReadProcessMemory(hProcess, lpBaseAddress, lpBuffer uintptr, nSize uint) (uintptr, error) {
-	ret, _, err := ProcReadProcessMemory.Call(
+func ReadProcessMemory(hProcess, lpBaseAddress, lpBuffer uintptr, nSize uint) uint8 {
+	ret, _, _ := ProcReadProcessMemory.Call(
 		hProcess,
 		lpBaseAddress,
 		lpBuffer,
@@ -68,15 +82,10 @@ func ReadProcessMemory(hProcess, lpBaseAddress, lpBuffer uintptr, nSize uint) (u
 		0,
 	)
 
-	if err.Error() != "The operation completed successfully." {
-		return 0, err
-	}
-
-	return ret, nil
+	return uint8(ret)
 }
 
 func Process32First(hSnap uintptr, entry *ProcessEntry32) bool {
-
 	ret, _, _ := ProcProcess32First.Call(
 		hSnap,
 		uintptr(unsafe.Pointer(entry)),
@@ -86,8 +95,39 @@ func Process32First(hSnap uintptr, entry *ProcessEntry32) bool {
 }
 
 func Process32Next(hSnap uintptr, entry *ProcessEntry32) bool {
-
 	ret, _, _ := ProcProcess32Next.Call(
+		hSnap,
+		uintptr(unsafe.Pointer(entry)),
+	)
+
+	return ret != 0
+}
+
+func OpenProcess(dwDesiredAccess uint32, bInheritHandle uint8, dwProcessId uint32) (uintptr, error) {
+	ret, _, _ := ProcOpenProcess.Call(
+		uintptr(dwDesiredAccess),
+		uintptr(bInheritHandle),
+		uintptr(dwProcessId),
+	)
+
+	if ret == 0 {
+		return 0, errors.New("failed to open process")
+	}
+
+	return ret, nil
+}
+
+func Module32First(hSnap uintptr, entry *ModuleEntry32) bool {
+	ret, _, _ := ProcModule32First.Call(
+		hSnap,
+		uintptr(unsafe.Pointer(entry)),
+	)
+
+	return ret != 0
+}
+
+func Module32Next(hSnap uintptr, entry *ModuleEntry32) bool {
+	ret, _, _ := ProcModule32Next.Call(
 		hSnap,
 		uintptr(unsafe.Pointer(entry)),
 	)

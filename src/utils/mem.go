@@ -30,3 +30,19 @@ func GetPID(pName string) (uint32, error) {
 func UInt82String(inp []uint8) string {
 	return string(inp[:bytes.Index(inp, []uint8{0})])
 }
+
+func GetModuleBaseAddress(pid uint32, mName string) (uintptr, error) {
+
+	// TH32CS_SNAPMODULE | TH32CS_SNAPMODULE32 = 0x10 | 0x8
+	handle := winapi.CreateToolhelp32Snapshot(0x18, pid)
+	var entry winapi.ModuleEntry32
+	entry.DwSize = uint32(unsafe.Sizeof(entry))
+
+	for valid := winapi.Module32First(handle, &entry); valid; valid = winapi.Module32Next(handle, &entry) {
+		if UInt82String(entry.SzModule[:]) == mName {
+			return uintptr(unsafe.Pointer(entry.ModBaseAddr)), nil
+		}
+	}
+
+	return 0, errors.New("module not found")
+}
