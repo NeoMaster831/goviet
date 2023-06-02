@@ -46,3 +46,30 @@ func GetModuleBaseAddress(pid uint32, mName string) (uintptr, error) {
 
 	return 0, errors.New("module not found")
 }
+
+func RPM(hSnap, whereas uintptr, data *interface{}) bool {
+	return winapi.ReadProcessMemory(hSnap, whereas, uintptr(unsafe.Pointer(data)), uint(unsafe.Sizeof(data))) != 0
+}
+
+func WPM(hSnap, whereas uintptr, data *interface{}) bool {
+	return winapi.WriteProcessMemory(hSnap, whereas, uintptr(unsafe.Pointer(data)), uint(unsafe.Sizeof(data))) != 0
+}
+
+// Pretty unstable, but I will handle it.
+func GetPointerChainValue(hSnap, mBase uintptr, offsets ...int32) (uintptr, error) {
+
+	now := mBase
+	var err error = nil
+
+	for i := 0; i < len(offsets)-1; i++ {
+		result := winapi.ReadProcessMemory(hSnap, now+uintptr(offsets[i]), uintptr(unsafe.Pointer(&now)), uint(unsafe.Sizeof(now)))
+		if result == 0 {
+			err = errors.New("couldn't get pointer chain value")
+			break
+		}
+	}
+
+	now += uintptr(offsets[len(offsets)-1])
+
+	return now, err
+}
