@@ -8,6 +8,7 @@ import (
 	"bytes"
 	"errors"
 	"pr0j3ct5/goviet/src/winapi"
+	"reflect"
 	"unsafe"
 )
 
@@ -31,6 +32,10 @@ func UInt82String(inp []uint8) string {
 	return string(inp[:bytes.Index(inp, []uint8{0})])
 }
 
+func String2UInt8(inp string) []uint8 {
+	return []byte(inp)
+}
+
 func GetModuleBaseAddress(pid uint32, mName string) (uintptr, error) {
 
 	// TH32CS_SNAPMODULE | TH32CS_SNAPMODULE32 = 0x10 | 0x8
@@ -47,12 +52,30 @@ func GetModuleBaseAddress(pid uint32, mName string) (uintptr, error) {
 	return 0, errors.New("module not found")
 }
 
-func RPM(hSnap, whereas uintptr, data *interface{}) bool {
-	return winapi.ReadProcessMemory(hSnap, whereas, uintptr(unsafe.Pointer(data)), uint(unsafe.Sizeof(data))) != 0
+func RPM(hSnap, where uintptr, storeat interface{}, size ...uint) bool {
+	if reflect.TypeOf(storeat).Kind() != reflect.Ptr {
+		return false
+	}
+
+	return winapi.ReadProcessMemory(
+		hSnap,
+		where,
+		reflect.ValueOf(storeat).Elem().Addr().Pointer(),
+		uint(reflect.TypeOf(storeat).Elem().Size()),
+	) != 0
 }
 
-func WPM(hSnap, whereas uintptr, data *interface{}) bool {
-	return winapi.WriteProcessMemory(hSnap, whereas, uintptr(unsafe.Pointer(data)), uint(unsafe.Sizeof(data))) != 0
+func WPM(hSnap, where uintptr, storeat interface{}) bool {
+	if reflect.TypeOf(storeat).Kind() != reflect.Ptr {
+		return false
+	}
+
+	return winapi.WriteProcessMemory(
+		hSnap,
+		where,
+		reflect.ValueOf(storeat).Elem().Addr().Pointer(),
+		uint(reflect.TypeOf(storeat).Elem().Size()),
+	) != 0
 }
 
 // Pretty unstable, but I will handle it.
