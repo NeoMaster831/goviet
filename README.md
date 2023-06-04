@@ -7,7 +7,7 @@
 
 <img src="https://img.shields.io/badge/go-%2300ADD8.svg?style=for-the-badge&logo=go&logoColor=white" />
 
-[![CodeFactor](https://www.codefactor.io/repository/github/neomaster831/goviet/badge/main)](https://www.codefactor.io/repository/github/neomaster831/goviet/overview/main)   [![Downloads](https://img.shields.io/github/downloads/NeoMaster831/goviet/total)   
+[![CodeFactor](https://www.codefactor.io/repository/github/neomaster831/goviet/badge/main)](https://www.codefactor.io/repository/github/neomaster831/goviet/overview/main)   ![Downloads](https://img.shields.io/github/downloads/NeoMaster831/goviet/total)   
 
 Made in Go, the code should be fine.
 
