@@ -52,7 +52,7 @@ func GetModuleBaseAddress(pid uint32, mName string) (uintptr, error) {
 	return 0, errors.New("module not found")
 }
 
-func RPM(hSnap, where uintptr, storeat interface{}, size ...uint) bool {
+func RPM(hSnap, where uintptr, storeat interface{}) bool {
 	if reflect.TypeOf(storeat).Kind() != reflect.Ptr {
 		return false
 	}
