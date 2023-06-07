@@ -114,7 +114,7 @@ func parseHitObject(form string) HitObject {
 }
 
 // Could be modified if I need some additional informations. so I seperated it.
-func (osu *Osu) parseGeneralObjects(lstring string) {
+func (osu *Osu) parseVariableObjects(lstring string) {
 
 	lsraw := strings.Join(strings.Split(lstring, ":")[1:], "")
 	lsint, _ := strconv.Atoi(lsraw)
@@ -181,8 +181,13 @@ func (osu *Osu) Parse(path string) {
 			continue
 		}
 
+		/*
+			Writing const values (not changing) in here,
+			and I seperated some variable values in parseVariableObjects.
+		*/
+
 		lstring := string(line[:])
-		osu.parseGeneralObjects(lstring)
+		osu.parseVariableObjects(lstring)
 
 		if lstring == "[TimingPoints]" {
 			mode = "T"
