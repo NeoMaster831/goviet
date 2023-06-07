@@ -136,38 +136,44 @@ func (osu *Osu) Parse(path string) {
 		}
 
 		lstring := string(line[:])
+		lsraw := strings.Join(strings.Split(lstring, ":")[1:], "")
+		lsint, _ := strconv.Atoi(lsraw)
+		lsfloat, _ := strconv.ParseFloat(lsraw, 64)
+		lcont := func(inp string) bool {
+			return strings.Contains(lstring, inp)
+		}
 
 		switch {
 
 		// [General]
-		case strings.Contains(lstring, "Mode"):
-			osu.Mode, _ = strconv.Atoi(strings.Split(lstring, ": ")[1])
+		case lcont("Mode"):
+			osu.Mode = lsint
 
 		// [Metadata]
-		case strings.Contains(lstring, "Title:"):
-			osu.Title = strings.Join(strings.Split(lstring, ":")[1:], "")
-		case strings.Contains(lstring, "Artist:"):
-			osu.Artist = strings.Join(strings.Split(lstring, ":")[1:], "")
-		case strings.Contains(lstring, "Creator:"):
-			osu.Creator = strings.Join(strings.Split(lstring, ":")[1:], "")
-		case strings.Contains(lstring, "Version:"):
-			osu.Version = strings.Join(strings.Split(lstring, ":")[1:], "")
-		case strings.Contains(lstring, "BeatmapID:"):
-			osu.Id, _ = strconv.Atoi(strings.Split(lstring, ":")[1])
+		case lcont("Title:"):
+			osu.Title = lsraw
+		case lcont("Artist:"):
+			osu.Artist = lsraw
+		case lcont("Creator:"):
+			osu.Creator = lsraw
+		case lcont("Version:"):
+			osu.Version = lsraw
+		case lcont("BeatmapID:"):
+			osu.Id = lsint
 
 		// [Difficulty]
-		case strings.Contains(lstring, "HPDrainRate:"):
-			osu.HP, _ = strconv.ParseFloat(strings.Split(lstring, ":")[1], 64)
-		case strings.Contains(lstring, "CircleSize:"):
-			osu.CS, _ = strconv.ParseFloat(strings.Split(lstring, ":")[1], 64)
-		case strings.Contains(lstring, "OverallDifficulty:"):
-			osu.OD, _ = strconv.ParseFloat(strings.Split(lstring, ":")[1], 64)
-		case strings.Contains(lstring, "ApproachRate:"):
-			osu.AR, _ = strconv.ParseFloat(strings.Split(lstring, ":")[1], 64)
-		case strings.Contains(lstring, "SliderMultiplier:"):
-			osu.SM, _ = strconv.ParseFloat(strings.Split(lstring, ":")[1], 64)
-		case strings.Contains(lstring, "SliderTickRate:"):
-			osu.ST, _ = strconv.ParseFloat(strings.Split(lstring, ":")[1], 64)
+		case lcont("HPDrainRate:"):
+			osu.HP = lsfloat
+		case lcont("CircleSize:"):
+			osu.CS = lsfloat
+		case lcont("OverallDifficulty:"):
+			osu.OD = lsfloat
+		case lcont("ApproachRate:"):
+			osu.AR = lsfloat
+		case lcont("SliderMultiplier:"):
+			osu.SM = lsfloat
+		case lcont("SliderTickRate:"):
+			osu.ST = lsfloat
 
 		}
 
@@ -177,7 +183,7 @@ func (osu *Osu) Parse(path string) {
 		} else if lstring == "[HitObjects]" {
 			mode = "H"
 			continue
-		} else if strings.Contains(lstring, "[") && strings.Contains(lstring, "]") {
+		} else if lcont("[") && lcont("]") {
 			mode = "G"
 			continue
 		}
