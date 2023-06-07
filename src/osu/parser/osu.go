@@ -113,6 +113,52 @@ func parseHitObject(form string) HitObject {
 	return ret
 }
 
+// Could be modified if I need some additional informations. so I seperated it.
+func (osu *Osu) parseGeneralObjects(lstring string) {
+
+	lsraw := strings.Join(strings.Split(lstring, ":")[1:], "")
+	lsint, _ := strconv.Atoi(lsraw)
+	lsfloat, _ := strconv.ParseFloat(lsraw, 64)
+	lcont := func(inp string) bool {
+		return strings.Contains(lstring, inp)
+	}
+
+	switch {
+
+	// [General]
+	case lcont("Mode"):
+		osu.Mode = lsint
+
+	// [Metadata]
+	case lcont("Title:"):
+		osu.Title = lsraw
+	case lcont("Artist:"):
+		osu.Artist = lsraw
+	case lcont("Creator:"):
+		osu.Creator = lsraw
+	case lcont("Version:"):
+		osu.Version = lsraw
+	case lcont("BeatmapID:"):
+		osu.Id = lsint
+
+	// [Difficulty]
+	case lcont("HPDrainRate:"):
+		osu.HP = lsfloat
+	case lcont("CircleSize:"):
+		osu.CS = lsfloat
+	case lcont("OverallDifficulty:"):
+		osu.OD = lsfloat
+	case lcont("ApproachRate:"):
+		osu.AR = lsfloat
+	case lcont("SliderMultiplier:"):
+		osu.SM = lsfloat
+	case lcont("SliderTickRate:"):
+		osu.ST = lsfloat
+
+	}
+
+}
+
 func (osu *Osu) Parse(path string) {
 
 	inpf, _ := os.Open(path)
@@ -136,46 +182,7 @@ func (osu *Osu) Parse(path string) {
 		}
 
 		lstring := string(line[:])
-		lsraw := strings.Join(strings.Split(lstring, ":")[1:], "")
-		lsint, _ := strconv.Atoi(lsraw)
-		lsfloat, _ := strconv.ParseFloat(lsraw, 64)
-		lcont := func(inp string) bool {
-			return strings.Contains(lstring, inp)
-		}
-
-		switch {
-
-		// [General]
-		case lcont("Mode"):
-			osu.Mode = lsint
-
-		// [Metadata]
-		case lcont("Title:"):
-			osu.Title = lsraw
-		case lcont("Artist:"):
-			osu.Artist = lsraw
-		case lcont("Creator:"):
-			osu.Creator = lsraw
-		case lcont("Version:"):
-			osu.Version = lsraw
-		case lcont("BeatmapID:"):
-			osu.Id = lsint
-
-		// [Difficulty]
-		case lcont("HPDrainRate:"):
-			osu.HP = lsfloat
-		case lcont("CircleSize:"):
-			osu.CS = lsfloat
-		case lcont("OverallDifficulty:"):
-			osu.OD = lsfloat
-		case lcont("ApproachRate:"):
-			osu.AR = lsfloat
-		case lcont("SliderMultiplier:"):
-			osu.SM = lsfloat
-		case lcont("SliderTickRate:"):
-			osu.ST = lsfloat
-
-		}
+		osu.parseGeneralObjects(lstring)
 
 		if lstring == "[TimingPoints]" {
 			mode = "T"
@@ -183,15 +190,14 @@ func (osu *Osu) Parse(path string) {
 		} else if lstring == "[HitObjects]" {
 			mode = "H"
 			continue
-		} else if lcont("[") && lcont("]") {
+		} else if strings.Contains(lstring, "[") && strings.Contains(lstring, "]") {
 			mode = "G"
 			continue
 		}
 
 		if mode == "T" {
 			tq = append(tq, parseTimingPoint(lstring))
-		}
-		if mode == "H" {
+		} else if mode == "H" {
 			hq = append(hq, parseHitObject(lstring))
 		}
 	}
