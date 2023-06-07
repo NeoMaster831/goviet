@@ -116,11 +116,14 @@ func parseHitObject(form string) HitObject {
 // Could be modified if I need some additional informations. so I seperated it.
 func (osu *Osu) parseVariableObjects(lstring string) {
 
-	lsraw := strings.Join(strings.Split(lstring, ":")[1:], "")
+	lsraw := strings.Join(strings.Split(lstring, ":")[1:], ":")
 	lsint, _ := strconv.Atoi(lsraw)
 	lsfloat, _ := strconv.ParseFloat(lsraw, 64)
 	lcont := func(inp string) bool {
-		return strings.Contains(lstring, inp)
+		if strings.Contains(lstring, ":") {
+			return strings.Split(lstring, ":")[0] == inp
+		}
+		return false
 	}
 
 	switch {
@@ -130,29 +133,29 @@ func (osu *Osu) parseVariableObjects(lstring string) {
 		osu.Mode = lsint
 
 	// [Metadata]
-	case lcont("Title:"):
+	case lcont("Title"):
 		osu.Title = lsraw
-	case lcont("Artist:"):
+	case lcont("Artist"):
 		osu.Artist = lsraw
-	case lcont("Creator:"):
+	case lcont("Creator"):
 		osu.Creator = lsraw
-	case lcont("Version:"):
+	case lcont("Version"):
 		osu.Version = lsraw
-	case lcont("BeatmapID:"):
+	case lcont("BeatmapID"):
 		osu.Id = lsint
 
 	// [Difficulty]
-	case lcont("HPDrainRate:"):
+	case lcont("HPDrainRate"):
 		osu.HP = lsfloat
-	case lcont("CircleSize:"):
+	case lcont("CircleSize"):
 		osu.CS = lsfloat
-	case lcont("OverallDifficulty:"):
+	case lcont("OverallDifficulty"):
 		osu.OD = lsfloat
-	case lcont("ApproachRate:"):
+	case lcont("ApproachRate"):
 		osu.AR = lsfloat
-	case lcont("SliderMultiplier:"):
+	case lcont("SliderMultiplier"):
 		osu.SM = lsfloat
-	case lcont("SliderTickRate:"):
+	case lcont("SliderTickRate"):
 		osu.ST = lsfloat
 
 	}

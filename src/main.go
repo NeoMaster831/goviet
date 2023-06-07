@@ -2,13 +2,12 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
-	"path/filepath"
 	osu "pr0j3ct5/goviet/src/osu/parser"
 )
 
-var folders []osu.Osu
+//var folders []osu.Osu
 
+/*
 func loopFolders(path string) {
 	files, _ := ioutil.ReadDir(path)
 
@@ -29,10 +28,18 @@ func loopFolders(path string) {
 
 	}
 }
+*/
 
 func main() {
-	loopFolders("C:/Users/last_/AppData/Local/osu!/Songs")
-	for _, osu := range folders {
-		fmt.Println(osu.Artist + " - " + osu.Title + " [" + osu.Version + "] made by " + osu.Creator)
-	}
+	//loopFolders("C:/Users/last_/AppData/Local/osu!/Songs")
+
+	var sample osu.Osu
+	sample.Parse("C:/Users/last_/AppData/Local/osu!/Songs/791798 cYsmix - Behind the Walls/Title This could cause error - Version This too (Lasse) [Hard].osu")
+	fmt.Println(sample.Artist + " - " + sample.Title + " [" + sample.Version + "] made by " + sample.Creator)
+
+	/*
+		for _, osu := range folders {
+			fmt.Println(osu.Artist + " - " + osu.Title + " [" + osu.Version + "] made by " + osu.Creator)
+		}
+	*/
 }
