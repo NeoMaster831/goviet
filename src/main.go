@@ -11,25 +11,12 @@ import (
 
 func main() {
 
-	pid, err := utils.GetPID("osu!.exe")
-	if err != nil {
-		fmt.Println("invalid pid")
-		return
-	}
-
-	mBase, err := utils.GetModuleBaseAddress(pid, "osu!.exe")
-	if err != nil {
-		fmt.Println("invalid mbase")
-	}
-
+	pid, _ := utils.GetPID("osu!.exe")
+	mBase, _ := utils.GetModuleBaseAddress(pid, "osu!.exe")
 	fmt.Println("mBase:", mBase)
-
-	hSnap, err := winapi.OpenProcess(0x001FFFFF, 0, pid)
-	if err != nil {
-		fmt.Println("invalid handle")
-	}
-
+	hSnap, _ := winapi.OpenProcess(0x001FFFFF, 0, pid)
 	osu.InitData(hSnap)
+
 	for {
 
 		var (

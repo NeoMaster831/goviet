@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	osu "pr0j3ct5/goviet/src/osu/parser"
+	"pr0j3ct5/goviet/src/osu/parser"
 	"pr0j3ct5/goviet/src/utils"
 	"sync"
 )
@@ -19,7 +19,7 @@ var (
 	GENERAL_WORKERS = 100
 
 	CUR_BEATMAP_A, CUR_BEATMAP_M = [...]uint8{0x8B, 0x0D, 0x00, 0x00, 0x00, 0x00, 0xBA, 0x00, 0x00, 0x00, 0x00, 0xE8, 0x00, 0x00, 0x00, 0x00, 0x83, 0xF8}, "xx????x????x????xx"
-	TIMESTAMP_A, TIMESTAMP_M     = [...]uint8{0xA3, 0x00, 0x00, 0x00, 0x00, 0xEB, 0x0A, 0xA1}, "x????xxx"
+	TIMESTAMP_A, TIMESTAMP_M     = [...]uint8{0x2B, 0x05, 0x00, 0x00, 0x00, 0x00, 0xA3, 0x00, 0x00, 0x00, 0x00, 0xEB, 0x0A}, "xx????x????xx"
 )
 
 // storing value (variables)
@@ -33,7 +33,7 @@ var (
 
 // storing data
 var (
-	Beatmaps map[int]osu.Osu = make(map[int]osu.Osu)
+	Beatmaps map[int]parser.Osu = make(map[int]parser.Osu)
 )
 
 // create workers
@@ -51,7 +51,7 @@ func loopFoldersWorker() error {
 			if !file.IsDir() {
 
 				newpath := filepath.Join(path, file.Name())
-				var sample osu.Osu
+				var sample parser.Osu
 				if filepath.Ext(newpath) != ".osu" {
 					continue
 				}
@@ -117,7 +117,7 @@ func InitData(hSnap uintptr) error {
 
 	CurBeatmap, _ = store(hSnap, CUR_BEATMAP_A[:], CUR_BEATMAP_M, 0x2)
 	fmt.Println("Got Current Beatmap... (1/4)")
-	Timestamp, _ = store(hSnap, TIMESTAMP_A[:], TIMESTAMP_M, 0x1)
+	Timestamp, _ = store(hSnap, TIMESTAMP_A[:], TIMESTAMP_M, 0x7)
 	fmt.Println("Got Timestamp... (2/4)")
 	State = Timestamp + 0x1F4
 	fmt.Println("Got State... (3/4)")
