@@ -2,4 +2,4 @@
  * TODO: code it *delicately*
  */
 
-package osu
+package modules

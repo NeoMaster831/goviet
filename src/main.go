@@ -2,44 +2,51 @@ package main
 
 import (
 	"fmt"
-	osu "pr0j3ct5/goviet/src/osu/parser"
+	"pr0j3ct5/goviet/src/osu"
+	"pr0j3ct5/goviet/src/osu/parser"
+	"pr0j3ct5/goviet/src/utils"
+	"pr0j3ct5/goviet/src/winapi"
+	"time"
 )
 
-//var folders []osu.Osu
-
-/*
-func loopFolders(path string) {
-	files, _ := ioutil.ReadDir(path)
-
-	for _, file := range files {
-
-		newpath := filepath.Join(path, file.Name())
-		if file.IsDir() {
-			loopFolders(newpath)
-		}
-
-		var sample osu.Osu
-		if filepath.Ext(newpath) != ".osu" {
-			continue
-		}
-
-		sample.Parse(newpath)
-		folders = append(folders, sample)
-
-	}
-}
-*/
-
 func main() {
-	//loopFolders("C:/Users/last_/AppData/Local/osu!/Songs")
 
-	var sample osu.Osu
-	sample.Parse("C:/Users/last_/AppData/Local/osu!/Songs/791798 cYsmix - Behind the Walls/Title This could cause error - Version This too (Lasse) [Hard].osu")
-	fmt.Println(sample.Artist + " - " + sample.Title + " [" + sample.Version + "] made by " + sample.Creator)
+	pid, err := utils.GetPID("osu!.exe")
+	if err != nil {
+		fmt.Println("invalid pid")
+		return
+	}
 
-	/*
-		for _, osu := range folders {
-			fmt.Println(osu.Artist + " - " + osu.Title + " [" + osu.Version + "] made by " + osu.Creator)
-		}
-	*/
+	mBase, err := utils.GetModuleBaseAddress(pid, "osu!.exe")
+	if err != nil {
+		fmt.Println("invalid mbase")
+	}
+
+	fmt.Println("mBase:", mBase)
+
+	hSnap, err := winapi.OpenProcess(0x001FFFFF, 0, pid)
+	if err != nil {
+		fmt.Println("invalid handle")
+	}
+
+	osu.InitData(hSnap)
+	for {
+
+		var (
+			beatmap   parser.BeatmapInstance
+			timestamp int32
+			state     int32
+			mods      int32
+		)
+
+		bmInstance, _ := utils.Get32BitPtr(hSnap, osu.CurBeatmap)
+		utils.RPM(hSnap, bmInstance, &beatmap)
+		utils.RPM(hSnap, osu.Timestamp, &timestamp)
+		utils.RPM(hSnap, osu.State, &state)
+		utils.RPM(hSnap, osu.Mods, &mods)
+
+		fmt.Println(beatmap.SetId, "-", beatmap.Id, timestamp, state, mods)
+
+		time.Sleep(1000 * time.Millisecond)
+	}
 }

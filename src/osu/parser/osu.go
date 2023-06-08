@@ -2,7 +2,7 @@
 * .osu Parser. Just implemented important modules
  */
 
-package osu
+package parser
 
 import (
 	"bufio"
@@ -216,7 +216,7 @@ func (osu *Osu) Parse(path string) {
 	l, r := 0, 0
 
 	// The Hit object is effected first
-	for l < len(tq)-1 && r < len(hq)-1 {
+	for l < len(tq)-1 || r < len(hq)-1 {
 		if tq[l].Time < hq[r].Time {
 			osu.ObjsByTime = append(osu.ObjsByTime, tq[l])
 			l++

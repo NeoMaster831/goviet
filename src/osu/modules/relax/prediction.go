@@ -2,4 +2,4 @@
 * prediction module for relax hack
  */
 
-package osu
+package relax

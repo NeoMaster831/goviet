@@ -25,6 +25,7 @@ var (
 	ProcOpenProcess              = kernel32.MustFindProc("OpenProcess")
 	ProcModule32First            = kernel32.MustFindProc("Module32First")
 	ProcModule32Next             = kernel32.MustFindProc("Module32Next")
+	ProcVirtualQueryEx           = kernel32.MustFindProc("VirtualQueryEx")
 )
 
 type ProcessEntry32 struct {
@@ -51,6 +52,17 @@ type ModuleEntry32 struct {
 	HModule       uintptr
 	SzModule      [MAX_MODULE_NAME32 + 1]uint8
 	SzExePath     [MAX_PATH]uint8
+}
+
+type Mbi struct {
+	BaseAddress       uintptr
+	AllocationBase    uintptr
+	AllocationProtect uint32
+	PartitionId       uint16
+	RegionSize        uint
+	State             uint32
+	Protect           uint32
+	Type              uint32
 }
 
 func CreateToolhelp32Snapshot(dwFlags uint32, th32ProcessID uint32) (ret uintptr) {
@@ -133,4 +145,15 @@ func Module32Next(hSnap uintptr, entry *ModuleEntry32) bool {
 	)
 
 	return ret != 0
+}
+
+func VirtualQueryEx(hSnap, lpAddress uintptr, lpBuffer *Mbi, size uint) uint {
+	ret, _, _ := ProcVirtualQueryEx.Call(
+		hSnap,
+		lpAddress,
+		uintptr(unsafe.Pointer(lpBuffer)),
+		uintptr(size),
+	)
+
+	return uint(ret)
 }

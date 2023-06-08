@@ -9,6 +9,7 @@ import (
 	"errors"
 	"pr0j3ct5/goviet/src/winapi"
 	"reflect"
+	"sync"
 	"unsafe"
 )
 
@@ -79,9 +80,9 @@ func WPM(hSnap, where uintptr, storeat interface{}) bool {
 }
 
 // Pretty unstable, but I will handle it.
-func GetPointerChainValue(hSnap, mBase uintptr, offsets ...int32) (uintptr, error) {
+func Get32BitPointerChainValue(hSnap, where uintptr, offsets ...int32) (uintptr, error) {
 
-	now := mBase
+	now := where
 	var err error = nil
 
 	for i := 0; i < len(offsets)-1; i++ {
@@ -90,9 +91,70 @@ func GetPointerChainValue(hSnap, mBase uintptr, offsets ...int32) (uintptr, erro
 			err = errors.New("couldn't get pointer chain value")
 			break
 		}
+		now &= 0x00000000FFFFFFFF
 	}
 
 	now += uintptr(offsets[len(offsets)-1])
 
 	return now, err
+}
+
+func Get32BitPtr(hSnap, where uintptr) (uintptr, bool) {
+	var ret uintptr
+	res := winapi.ReadProcessMemory(
+		hSnap,
+		where,
+		uintptr(unsafe.Pointer(&ret)),
+		4,
+	)
+	return ret, res != 0
+}
+
+type AobTask struct {
+	A     []byte
+	M     string
+	Start uintptr
+	Size  uint
+}
+
+func AsyncScanWorker(hSnap uintptr, wg *sync.WaitGroup, chk *bool, aobj *chan AobTask, storeat *uintptr) {
+	for task := range *aobj {
+		//fmt.Printf("Running Task @ %x(%x), Found? = %t\n", task.Start, task.Size, *chk)
+		if *chk {
+			(*wg).Done()
+			continue
+		}
+		patsz := len(task.M)
+		for i := uint(0); i < task.Size; i++ {
+			found := true
+			for j := 0; j < patsz; j++ {
+				var res uint8
+				_ = RPM(hSnap, task.Start+uintptr(i)+uintptr(j), &res)
+				if task.M[j] != '?' && task.A[j] != res {
+					found = false
+					break
+				}
+			}
+			if found {
+				*chk = true
+				*storeat = task.Start + uintptr(i)
+			}
+		}
+		(*wg).Done()
+	}
+}
+
+func AsyncScanRegion(hSnap uintptr, pattern []uint8, mask string, begin uintptr, size uint, Chan *chan AobTask, wg *sync.WaitGroup) {
+	var mbi winapi.Mbi = winapi.Mbi{RegionSize: 0}
+	for cur := begin; cur < begin+uintptr(size); cur += uintptr(mbi.RegionSize) {
+		if winapi.VirtualQueryEx(hSnap, cur, &mbi, uint(unsafe.Sizeof(mbi))) == 0 ||
+			mbi.State != 0x1000 ||
+			mbi.Protect&0x100 != 0 ||
+			mbi.Protect&0x01 != 0 {
+			continue
+		}
+
+		wg.Add(1)
+		*Chan <- AobTask{pattern[:], mask, cur, mbi.RegionSize}
+	}
 }
