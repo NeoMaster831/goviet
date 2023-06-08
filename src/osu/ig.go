@@ -13,22 +13,28 @@ import (
 	"sync"
 )
 
+/*
+################################### VARIABLE SECTION #########################################
+*/
+
 // consts (aob, pointer chain, ...)
 var (
 	OSU_SONGS_PATH  = "C:/Users/last_/AppData/Local/osu!/Songs"
 	GENERAL_WORKERS = 100
+	MAX_SIZE        = 0x24000000
 
 	CUR_BEATMAP_A, CUR_BEATMAP_M = [...]uint8{0x8B, 0x0D, 0x00, 0x00, 0x00, 0x00, 0xBA, 0x00, 0x00, 0x00, 0x00, 0xE8, 0x00, 0x00, 0x00, 0x00, 0x83, 0xF8}, "xx????x????x????xx"
 	TIMESTAMP_A, TIMESTAMP_M     = [...]uint8{0x2B, 0x05, 0x00, 0x00, 0x00, 0x00, 0xA3, 0x00, 0x00, 0x00, 0x00, 0xEB, 0x0A}, "xx????x????xx"
+	KEYSET_A, KEYSET_M           = [...]uint8{0x89, 0x55, 0xD4, 0x8B, 0x15, 0x00, 0x00, 0x00, 0x00, 0x38, 0x02}, "xxxxx????xx"
 )
 
 // storing value (variables)
 var (
-	Keyset     uintptr // -> [2]uint8
-	State      uintptr // -> int
-	Mods       uintptr // -> int
-	Timestamp  uintptr // -> int
-	CurBeatmap uintptr // -> *osu.BeatmapInstance
+	Keyset     [2]uintptr // -> two uint8's
+	State      uintptr    // -> int
+	Mods       uintptr    // -> int
+	Timestamp  uintptr    // -> int
+	CurBeatmap uintptr    // -> *osu.BeatmapInstance
 )
 
 // storing data
@@ -42,6 +48,10 @@ var (
 	loopj chan string = make(chan string)
 	mutex             = &sync.Mutex{}
 )
+
+/*
+################################### INIT FUNCTIONS SECTION #########################################
+*/
 
 func loopFoldersWorker() error {
 	for path := range loopj {
@@ -91,7 +101,7 @@ func store(hSnap uintptr, pat []uint8, mask string, offset uintptr) (uintptr, bo
 	for w := 1; w <= GENERAL_WORKERS; w++ {
 		go utils.AsyncScanWorker(hSnap, &wg, &found, &aobj, &ret)
 	}
-	utils.AsyncScanRegion(hSnap, pat, mask, 0x0, 0x18000000, &aobj, &wg)
+	utils.AsyncScanRegion(hSnap, pat, mask, 0x0, uint(MAX_SIZE), &aobj, &wg)
 
 	if !found {
 		return 0, false
@@ -105,7 +115,6 @@ func store(hSnap uintptr, pat []uint8, mask string, offset uintptr) (uintptr, bo
 func InitData(hSnap uintptr) error {
 
 	fmt.Println("Parsing .osu files...")
-	//loopFolders(OSU_SONGS_PATH)
 	for w := 1; w <= GENERAL_WORKERS; w++ {
 		go loopFoldersWorker()
 	}
@@ -116,15 +125,28 @@ func InitData(hSnap uintptr) error {
 	fmt.Println("Getting necessary values...")
 
 	CurBeatmap, _ = store(hSnap, CUR_BEATMAP_A[:], CUR_BEATMAP_M, 0x2)
-	fmt.Println("Got Current Beatmap... (1/4)")
+	fmt.Println("Got Current Beatmap... (1/5)")
 	Timestamp, _ = store(hSnap, TIMESTAMP_A[:], TIMESTAMP_M, 0x7)
-	fmt.Println("Got Timestamp... (2/4)")
+	fmt.Println("Got Timestamp... (2/5)")
 	State = Timestamp + 0x1F4
-	fmt.Println("Got State... (3/4)")
+	fmt.Println("Got State... (3/5)")
 	Mods = Timestamp - 0x414
-	fmt.Println("Got Mods... (4/4)")
+	fmt.Println("Got Mods... (4/5)")
+	tmp, _ := store(hSnap, KEYSET_A[:], KEYSET_M, 0x5)
+	Keyset[0], _ = utils.Get32BitPointerChainValue(hSnap, tmp, 0, 8, 0x14)
+	Keyset[1] = Keyset[0] + 0x10
+	fmt.Println("Got Keysets.... (5/5)")
 
 	fmt.Printf("CurBeatmap: %x, State: %x, Timestamp: %x, Mods: %x\n", CurBeatmap, State, Timestamp, Mods)
+	fmt.Printf("Keyset: %x / %x\n", Keyset[0], Keyset[1])
 
 	return nil
+}
+
+/*
+################################### DATA GETTING SECTION #########################################
+*/
+
+func GetBtmpDueId(id int) parser.Osu {
+	return Beatmaps[id]
 }

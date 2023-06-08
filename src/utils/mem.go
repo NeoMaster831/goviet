@@ -86,8 +86,8 @@ func Get32BitPointerChainValue(hSnap, where uintptr, offsets ...int32) (uintptr,
 	var err error = nil
 
 	for i := 0; i < len(offsets)-1; i++ {
-		result := winapi.ReadProcessMemory(hSnap, now+uintptr(offsets[i]), uintptr(unsafe.Pointer(&now)), uint(unsafe.Sizeof(now)))
-		if result == 0 {
+		result := RPM(hSnap, now+uintptr(offsets[i]), &now)
+		if !result {
 			err = errors.New("couldn't get pointer chain value")
 			break
 		}

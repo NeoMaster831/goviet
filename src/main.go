@@ -24,15 +24,22 @@ func main() {
 			timestamp int32
 			state     int32
 			mods      int32
+			key1      uint8
+			key2      uint8
 		)
 
 		bmInstance, _ := utils.Get32BitPtr(hSnap, osu.CurBeatmap)
 		utils.RPM(hSnap, bmInstance, &beatmap)
+		cur := osu.Beatmaps[int(beatmap.Id)]
+
 		utils.RPM(hSnap, osu.Timestamp, &timestamp)
 		utils.RPM(hSnap, osu.State, &state)
 		utils.RPM(hSnap, osu.Mods, &mods)
+		utils.RPM(hSnap, osu.Keyset[0], &key1)
+		utils.RPM(hSnap, osu.Keyset[1], &key2)
 
-		fmt.Println(beatmap.SetId, "-", beatmap.Id, timestamp, state, mods)
+		fmt.Printf("%s - %s [%s] by %s\n", cur.Artist, cur.Title, cur.Version, cur.Creator)
+		fmt.Printf("Timestamp: %d | State: 0x%x | Mods: 0x%x | Keyset: %c / %c\n", timestamp, state, mods, key1, key2)
 
 		time.Sleep(1000 * time.Millisecond)
 	}
