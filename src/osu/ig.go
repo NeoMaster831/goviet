@@ -147,6 +147,6 @@ func InitData(hSnap uintptr) error {
 ################################### DATA GETTING SECTION #########################################
 */
 
-func GetBtmpDueId(id int) parser.Osu {
-	return Beatmaps[id]
+func GetBtmpDueId(id int32) parser.Osu {
+	return Beatmaps[int(id)]
 }
