@@ -16,3 +16,7 @@
 Made in Go, the code should be fine.
 
 The project is GOING on, so you should mark it!
+
+## Dependencies
+
++ [keybd_event](https://github.com/micmonay/keybd_event)

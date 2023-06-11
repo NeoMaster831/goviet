@@ -17,6 +17,10 @@ func main() {
 	hSnap, _ := winapi.OpenProcess(0x001FFFFF, 0, pid)
 	osu.InitData(hSnap)
 
+	var (
+		playing = false
+	)
+
 	for {
 
 		var (
@@ -30,7 +34,7 @@ func main() {
 
 		bmInstance, _ := utils.Get32BitPtr(hSnap, osu.CurBeatmap)
 		utils.RPM(hSnap, bmInstance, &beatmap)
-		cur := osu.GetBtmpDueId(beatmap.Id)
+		//cur := osu.GetBtmpDueId(beatmap.Id)
 
 		utils.RPM(hSnap, osu.Timestamp, &timestamp)
 		utils.RPM(hSnap, osu.State, &state)
@@ -38,8 +42,15 @@ func main() {
 		utils.RPM(hSnap, osu.Keyset[0], &key1)
 		utils.RPM(hSnap, osu.Keyset[1], &key2)
 
-		fmt.Printf("%s - %s [%s] by %s\n", cur.Artist, cur.Title, cur.Version, cur.Creator)
-		fmt.Printf("Timestamp: %d | State: 0b%b | Mods: 0b%b | Keyset: %c / %c\n", timestamp, state, mods, key1, key2)
+		if state == 2 && !playing {
+			playing = true
+			for i := 1; i <= osu.RELAX_WORKERS; i++ {
+				go osu.AsyncRelaxController(hSnap, &playing)
+				time.Sleep(30 * time.Millisecond)
+			}
+		}
+		//fmt.Printf("%s - %s [%s] by %s\n", cur.Artist, cur.Title, cur.Version, cur.Creator)
+		//fmt.Printf("Timestamp: %d | State: %d | Mods: 0b%b | Keyset: %c / %c\n", timestamp, state, mods, key1, key2)
 
 		time.Sleep(1000 * time.Millisecond)
 	}

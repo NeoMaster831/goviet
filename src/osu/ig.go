@@ -19,9 +19,13 @@ import (
 
 // consts (aob, pointer chain, ...)
 var (
-	OSU_SONGS_PATH  = "C:/Users/last_/AppData/Local/osu!/Songs"
-	GENERAL_WORKERS = 100
-	MAX_SIZE        = 0x24000000
+	OSU_SONGS_PATH         = "C:/Users/last_/AppData/Local/osu!/Songs"
+	GENERAL_WORKERS        = 100
+	MAX_SIZE               = 0x24000000
+	OFFSET                 = 10
+	CIRCLE_CLICK_DURATION  = 17
+	SLIDER_CLICK_DURATION  = 20
+	SPINNER_CLICK_DURATION = 17
 
 	CUR_BEATMAP_A, CUR_BEATMAP_M = [...]uint8{0x8B, 0x0D, 0x00, 0x00, 0x00, 0x00, 0xBA, 0x00, 0x00, 0x00, 0x00, 0xE8, 0x00, 0x00, 0x00, 0x00, 0x83, 0xF8}, "xx????x????x????xx"
 	TIMESTAMP_A, TIMESTAMP_M     = [...]uint8{0x2B, 0x05, 0x00, 0x00, 0x00, 0x00, 0xA3, 0x00, 0x00, 0x00, 0x00, 0xEB, 0x0A}, "xx????x????xx"
@@ -132,9 +136,9 @@ func InitData(hSnap uintptr) error {
 	fmt.Println("Got State... (3/5)")
 	Mods = Timestamp - 0x414
 	fmt.Println("Got Mods... (4/5)")
-	tmp, _ := store(hSnap, KEYSET_A[:], KEYSET_M, 0x5)
-	Keyset[0], _ = utils.Get32BitPointerChainValue(hSnap, tmp, 0, 8, 0x14)
-	Keyset[1] = Keyset[0] + 0x10
+	//tmp, _ := store(hSnap, KEYSET_A[:], KEYSET_M, 0x5)
+	//Keyset[0] = utils.Get32BitPointerChainValue(hSnap, tmp, 0, 8, 0x14)
+	//Keyset[1] = Keyset[0] + 0x10
 	fmt.Println("Got Keysets.... (5/5)")
 
 	fmt.Printf("CurBeatmap: %x, State: %x, Timestamp: %x, Mods: %x\n", CurBeatmap, State, Timestamp, Mods)
