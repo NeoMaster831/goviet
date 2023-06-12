@@ -6,8 +6,10 @@ package osu
 
 import (
 	"fmt"
+	"math/rand"
 	"pr0j3ct5/goviet/src/osu/parser"
 	"pr0j3ct5/goviet/src/utils"
+	"pr0j3ct5/goviet/src/winapi"
 	"reflect"
 	"time"
 
@@ -72,7 +74,10 @@ func AsyncHitCircleClick(key uint8) {
 	}
 
 	kb.SetKeys(bending)
-	fmt.Println("Debug: Hit Circle Clicked!")
+	presleep := rand.Intn(OFFSET * 2)
+	time.Sleep(time.Duration(presleep) * time.Millisecond)
+
+	fmt.Println("Debug: Hit Circle Clicked after", presleep, "amount of milliseconds.")
 	kb.Press()
 	time.Sleep(time.Duration(CIRCLE_CLICK_DURATION) * time.Millisecond)
 	kb.Release()
@@ -86,7 +91,10 @@ func AsyncSliderClick(key uint8, state NowPlayState, slider parser.SliderParams)
 	}
 
 	duration := GetSliderTime(state, slider)
-	fmt.Println("Debug: Slider clicked! Slider duration:", duration)
+	presleep := rand.Intn(OFFSET * 2)
+	time.Sleep(time.Duration(presleep) * time.Millisecond)
+
+	fmt.Println("Debug: Slider clicked after", presleep, ", Slider duration:", duration)
 	kb.SetKeys(bending)
 	kb.Press()
 	time.Sleep(time.Duration(duration+SLIDER_CLICK_DURATION) * time.Millisecond)
@@ -110,6 +118,7 @@ func AsyncSpinnerClick(key uint8, spinner parser.SpinnerParams, now int) {
 
 func AsyncRelaxController(hSnap uintptr, playing *bool) {
 
+	winapi.ProcTimeBeginPeriod.Call(uintptr(1))
 	var (
 		beatmap   parser.BeatmapInstance
 		timestamp int32
@@ -174,6 +183,7 @@ func AsyncRelaxController(hSnap uintptr, playing *bool) {
 			}
 			idx++
 		}
+
 		fmt.Println("el:", time.Since(s))
 	}
 

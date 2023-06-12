@@ -28,8 +28,8 @@ func main() {
 			timestamp int32
 			state     int32
 			mods      int32
-			key1      uint8
-			key2      uint8
+			//key1      uint8
+			//key2      uint8
 		)
 
 		bmInstance, _ := utils.Get32BitPtr(hSnap, osu.CurBeatmap)
@@ -39,8 +39,8 @@ func main() {
 		utils.RPM(hSnap, osu.Timestamp, &timestamp)
 		utils.RPM(hSnap, osu.State, &state)
 		utils.RPM(hSnap, osu.Mods, &mods)
-		utils.RPM(hSnap, osu.Keyset[0], &key1)
-		utils.RPM(hSnap, osu.Keyset[1], &key2)
+		//utils.RPM(hSnap, osu.Keyset[0], &key1)
+		//utils.RPM(hSnap, osu.Keyset[1], &Millisecond)
 
 		if state == 2 && !playing {
 			playing = true
@@ -54,4 +54,5 @@ func main() {
 
 		time.Sleep(1000 * time.Millisecond)
 	}
+
 }

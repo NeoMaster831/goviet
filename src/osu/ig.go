@@ -22,7 +22,7 @@ var (
 	OSU_SONGS_PATH         = "C:/Users/last_/AppData/Local/osu!/Songs"
 	GENERAL_WORKERS        = 100
 	MAX_SIZE               = 0x24000000
-	OFFSET                 = 10
+	OFFSET                 = 1
 	CIRCLE_CLICK_DURATION  = 17
 	SLIDER_CLICK_DURATION  = 20
 	SPINNER_CLICK_DURATION = 17

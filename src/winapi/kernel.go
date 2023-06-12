@@ -17,6 +17,7 @@ const (
 
 var (
 	kernel32                     = syscall.MustLoadDLL("kernel32.dll")
+	winmmDLL                     = syscall.NewLazyDLL("winmm.dll")
 	ProcReadProcessMemory        = kernel32.MustFindProc("ReadProcessMemory")
 	ProcWriteProcessMemory       = kernel32.MustFindProc("WriteProcessMemory")
 	ProcProcess32First           = kernel32.MustFindProc("Process32First")
@@ -26,6 +27,7 @@ var (
 	ProcModule32First            = kernel32.MustFindProc("Module32First")
 	ProcModule32Next             = kernel32.MustFindProc("Module32Next")
 	ProcVirtualQueryEx           = kernel32.MustFindProc("VirtualQueryEx")
+	ProcTimeBeginPeriod          = winmmDLL.NewProc("timeBeginPeriod")
 )
 
 type ProcessEntry32 struct {

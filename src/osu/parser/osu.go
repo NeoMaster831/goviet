@@ -215,9 +215,9 @@ func (osu *Osu) Parse(path string) {
 	hq = append(hq, HitObject{Time: 2147483647})
 	l, r := 0, 0
 
-	// The Hit object is effected first
+	// I was wrong, timing point affects first.
 	for l < len(tq)-1 || r < len(hq)-1 {
-		if tq[l].Time < hq[r].Time {
+		if tq[l].Time <= hq[r].Time {
 			osu.ObjsByTime = append(osu.ObjsByTime, tq[l])
 			l++
 		} else {
