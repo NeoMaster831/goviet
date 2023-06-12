@@ -23,8 +23,8 @@ The project is GOING on, so you should mark it!
 
 ### To-dos
 
-- [] Relax 모듈들 정리하기 -> 오류 최소화, 스마트하게 변경
+- [ ] Relax 모듈들 정리하기 -> 오류 최소화, 스마트하게 변경
 - [X] RelaxController Speed 문제 해결하기
-- [] Permanent Offset 찾기 -> Offset 업데이트
-- [] Prediction 개발하기
-- [] Aim Assist 개발 들어가기
+- [ ] Permanent Offset 찾기 -> Offset 업데이트
+- [ ] Prediction 개발하기
+- [ ] Aim Assist 개발 들어가기
