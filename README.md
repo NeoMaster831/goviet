@@ -17,6 +17,8 @@ Made in Go, the code should be fine.
 
 The project is GOING on, so you should mark it!
 
+*Reminder*: **I have no purpose to abuse this project for gaining advantage of the game: I am just showing how did I hack the game, so I published it by open source.**
+
 ## Dependencies
 
 + [keybd_event](https://github.com/micmonay/keybd_event)
