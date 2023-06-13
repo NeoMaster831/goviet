@@ -39,6 +39,8 @@ var (
 	Mods       uintptr    // -> int
 	Timestamp  uintptr    // -> int
 	CurBeatmap uintptr    // -> *osu.BeatmapInstance
+	CursorPos  uintptr    // int[2]
+	Resolution uintptr    // int[2]
 )
 
 // storing data

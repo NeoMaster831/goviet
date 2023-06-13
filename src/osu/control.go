@@ -64,7 +64,35 @@ func GetSliderTime(now NowPlayState, slider parser.SliderParams) int {
 	return int(slider.Length/(now.OrigSM*100.0)*(now.SMMul/100.0)*now.BeatLength) * slider.Slides
 }
 
+func CS2Px(cs float64) float64 {
+	return 54.4 - 4.48*cs
+}
+
+func CursorPos2OsuPlayArea(cursor utils.Vec2) utils.Vec2 {
+	_, orig, ratio := utils.GetPlayfieldSzNOrig()
+	raw := utils.Vec2{X: cursor.X - orig.X, Y: cursor.Y - orig.Y}
+	raw.X /= ratio
+	raw.Y /= ratio
+	return raw
+}
+
 // 'bout relax
+
+// Prediction v1
+
+const (
+	ALLOWABLE_RANGE = 50
+	MALLOWABLE      = 0.8
+)
+
+// TODO: Hard Rock: Multiplies the CS value by 1.3, up to a maximum of 10.
+func PredictionCheck(timestamp int32, hit parser.HitObject, cursor utils.Vec2, cs float64) bool {
+	playf := CursorPos2OsuPlayArea(cursor)
+	dist := utils.Dist(playf, utils.Vec2{X: float64(hit.X), Y: float64(hit.Y)})
+	rnge := CS2Px(cs)
+	ratio := dist / rnge
+	return (hit.Time+ALLOWABLE_RANGE > int(timestamp) && hit.Time-ALLOWABLE_RANGE < int(timestamp)) && (ratio > MALLOWABLE && ratio < 1.0)
+}
 
 func AsyncHitCircleClick(key uint8) {
 	kb, _ := keybd_event.NewKeyBonding()
@@ -169,7 +197,14 @@ func AsyncRelaxController(hSnap uintptr, playing *bool) {
 		} else { // Case: Hit Object
 			obj := queue[idx].(parser.HitObject)
 			//fmt.Println(obj.Time, int(timestamp)+OFFSET, int(timestamp)-OFFSET, *playing)
-			if obj.Time > int(timestamp)+OFFSET {
+			freepass := false
+
+			// Prediction Check, TODO: add cursor pos
+			if PredictionCheck(timestamp, obj, utils.Vec2{}, cur.CS) {
+				freepass = true
+			}
+
+			if obj.Time > int(timestamp)+OFFSET && !freepass {
 				continue
 			}
 			fmt.Println(idx)
